@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sharkleague.ui.theme.SharkLeagueTheme
+import androidx.compose.material.icons.outlined.SportsSoccer
+import androidx.compose.material.icons.outlined.Groups
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,31 +76,31 @@ fun BottomNavigationBar(selected: Int, onTabSelected: (Int) -> Unit) {
             selected = selected == 0,
             onClick = { onTabSelected(0) },
             label = { Text("General") },
-            icon = { Icon(Icons.Default.Info, contentDescription = "General") }
+            icon = { Icon(Icons.Outlined.Info, contentDescription = "General") }
         )
         NavigationBarItem(
             selected = selected == 1,
             onClick = { onTabSelected(1) },
             label = { Text("Partidos") },
-            icon = { Icon(Icons.Default.SportsSoccer, contentDescription = "Partidos") }
+            icon = { Icon(Icons.Outlined.SportsSoccer, contentDescription = "Partidos") }
         )
         NavigationBarItem(
             selected = selected == 2,
             onClick = { onTabSelected(2) },
             label = { Text("Home") },
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") }
+            icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") }
         )
         NavigationBarItem(
             selected = selected == 3,
             onClick = { onTabSelected(3) },
             label = { Text("Equipos") },
-            icon = { Icon(Icons.Default.Groups, contentDescription = "Equipos") }
+            icon = { Icon(Icons.Outlined.Groups, contentDescription = "Equipos") }
         )
         NavigationBarItem(
             selected = selected == 4,
             onClick = { onTabSelected(4) },
             label = { Text("Perfil") },
-            icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") }
+            icon = { Icon(Icons.Outlined.Person, contentDescription = "Perfil") }
         )
     }
 }
