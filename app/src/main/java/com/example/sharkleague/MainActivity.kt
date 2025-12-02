@@ -62,9 +62,9 @@ fun TopLogoBar() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = painterResource(android.R.drawable.ic_menu_gallery),
+            painter = painterResource(R.drawable.logo_liga_futbol),
             contentDescription = "Logo temporal",
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(300.dp)
         )
     }
 }
@@ -107,8 +107,8 @@ fun BottomNavigationBar(selected: Int, onTabSelected: (Int) -> Unit) {
 
 @Composable
 fun HomeContent(modifier: Modifier = Modifier) {
-    val proximos = listOf("Shark FC vs Tigres 🔵🟡 – 18 Feb, 4:00 PM")
-    val recientes = listOf("Shark FC 3 - 1 Dragones 🦈🔥 – 10 Feb")
+    val proximos = listOf("Chivas vs Tigres – 18 Feb, 4:00 PM")
+    val recientes = listOf("Toluca 3 - 1 Dragones – 10 Feb")
 
     LazyColumn(
         modifier = modifier
