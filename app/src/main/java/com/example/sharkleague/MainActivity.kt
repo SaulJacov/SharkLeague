@@ -14,14 +14,28 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.sharkleague.ui.theme.SharkLeagueTheme
-import androidx.compose.material.icons.outlined.SportsSoccer
-import androidx.compose.material.icons.outlined.Groups
 
+// Sealed class for navigation routes
+sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+    object General : Screen("general", "General", Icons.Outlined.Info)
+    object Partidos : Screen("partidos", "Partidos", Icons.Outlined.SportsSoccer)
+    object Home : Screen("home", "Home", Icons.Outlined.Home)
+    object Equipos : Screen("equipos", "Equipos", Icons.Outlined.Groups)
+    object Perfil : Screen("perfil", "Perfil", Icons.Outlined.Person)
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,18 +51,25 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
-    var selectedTab by remember { mutableStateOf(2) } // 2 = Home por default
+    val navController = rememberNavController()
 
     Scaffold(
         topBar = { TopLogoBar() },
         bottomBar = {
-            BottomNavigationBar(
-                selected = selectedTab,
-                onTabSelected = { selectedTab = it }
-            )
+            BottomNavigationBar(navController = navController)
         }
     ) { innerPadding ->
-        HomeContent(Modifier.padding(innerPadding))
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(Screen.General.route) { GeneralContent() }
+            composable(Screen.Partidos.route) { PartidosContent() }
+            composable(Screen.Home.route) { HomeContent() }
+            composable(Screen.Equipos.route) { EquiposContent() }
+            composable(Screen.Perfil.route) { PerfilContent() }
+        }
     }
 }
 
@@ -70,40 +91,37 @@ fun TopLogoBar() {
 }
 
 @Composable
-fun BottomNavigationBar(selected: Int, onTabSelected: (Int) -> Unit) {
+fun BottomNavigationBar(navController: NavController) {
+    val items = listOf(
+        Screen.General,
+        Screen.Partidos,
+        Screen.Home,
+        Screen.Equipos,
+        Screen.Perfil,
+    )
     NavigationBar {
-        NavigationBarItem(
-            selected = selected == 0,
-            onClick = { onTabSelected(0) },
-            label = { Text("General") },
-            icon = { Icon(Icons.Outlined.Info, contentDescription = "General") }
-        )
-        NavigationBarItem(
-            selected = selected == 1,
-            onClick = { onTabSelected(1) },
-            label = { Text("Partidos") },
-            icon = { Icon(Icons.Outlined.SportsSoccer, contentDescription = "Partidos") }
-        )
-        NavigationBarItem(
-            selected = selected == 2,
-            onClick = { onTabSelected(2) },
-            label = { Text("Home") },
-            icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") }
-        )
-        NavigationBarItem(
-            selected = selected == 3,
-            onClick = { onTabSelected(3) },
-            label = { Text("Equipos") },
-            icon = { Icon(Icons.Outlined.Groups, contentDescription = "Equipos") }
-        )
-        NavigationBarItem(
-            selected = selected == 4,
-            onClick = { onTabSelected(4) },
-            label = { Text("Perfil") },
-            icon = { Icon(Icons.Outlined.Person, contentDescription = "Perfil") }
-        )
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+
+        items.forEach { screen ->
+            NavigationBarItem(
+                icon = { Icon(screen.icon, contentDescription = screen.title) },
+                label = { Text(screen.title) },
+                selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
     }
 }
+
 
 @Composable
 fun HomeContent(modifier: Modifier = Modifier) {
@@ -147,6 +165,36 @@ fun HomeContent(modifier: Modifier = Modifier) {
         }
     }
 }
+
+// Placeholder Composables for other screens
+@Composable
+fun GeneralContent(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Pantalla General")
+    }
+}
+
+@Composable
+fun PartidosContent(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Pantalla de Partidos")
+    }
+}
+
+@Composable
+fun EquiposContent(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Pantalla de Equipos")
+    }
+}
+
+@Composable
+fun PerfilContent(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Pantalla de Perfil")
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
