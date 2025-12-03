@@ -62,7 +62,7 @@ fun TopLogoBar() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = painterResource(R.drawable.logo_liga_futbol),
+            painter = painterResource(R.drawable.logo_sharkleague),
             contentDescription = "Logo temporal",
             modifier = Modifier.size(300.dp)
         )
