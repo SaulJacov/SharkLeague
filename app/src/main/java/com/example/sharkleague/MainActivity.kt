@@ -26,6 +26,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.sharkleague.ui.screens.EquiposContent
+import com.example.sharkleague.ui.screens.GeneralContent
+import com.example.sharkleague.ui.screens.PartidosContent
+import com.example.sharkleague.ui.screens.PerfilContent
 import com.example.sharkleague.ui.theme.SharkLeagueTheme
 
 // Sealed class for navigation routes
@@ -165,36 +169,6 @@ fun HomeContent(modifier: Modifier = Modifier) {
         }
     }
 }
-
-// Placeholder Composables for other screens
-@Composable
-fun GeneralContent(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Pantalla General")
-    }
-}
-
-@Composable
-fun PartidosContent(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Pantalla de Partidos")
-    }
-}
-
-@Composable
-fun EquiposContent(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Pantalla de Equipos")
-    }
-}
-
-@Composable
-fun PerfilContent(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Pantalla de Perfil")
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
