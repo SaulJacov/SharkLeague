@@ -11,5 +11,6 @@ import androidx.compose.ui.Modifier
 fun AjustesContent(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("Pantalla de Ajustes")
-    }
+        Text("Creancion de la rama")
+        Text("esta es una prueba")    }
 }
