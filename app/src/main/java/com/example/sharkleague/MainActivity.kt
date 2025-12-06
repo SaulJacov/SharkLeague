@@ -29,7 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sharkleague.ui.screens.EquiposContent
 import com.example.sharkleague.ui.screens.GeneralContent
 import com.example.sharkleague.ui.screens.PartidosContent
-import com.example.sharkleague.ui.screens.PerfilContent
+import com.example.sharkleague.ui.screens.AjustesContent
 import com.example.sharkleague.ui.theme.SharkLeagueTheme
 
 // Sealed class for navigation routes
@@ -38,7 +38,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Partidos : Screen("partidos", "Partidos", Icons.Outlined.SportsSoccer)
     object Home : Screen("home", "Home", Icons.Outlined.Home)
     object Equipos : Screen("equipos", "Equipos", Icons.Outlined.Groups)
-    object Perfil : Screen("perfil", "Perfil", Icons.Outlined.Person)
+    object Ajustes : Screen("Ajustes", "Ajustes", Icons.Outlined.Settings)
 }
 
 class MainActivity : ComponentActivity() {
@@ -72,7 +72,7 @@ fun MainScreen() {
             composable(Screen.Partidos.route) { PartidosContent() }
             composable(Screen.Home.route) { HomeContent() }
             composable(Screen.Equipos.route) { EquiposContent() }
-            composable(Screen.Perfil.route) { PerfilContent() }
+            composable(Screen.Ajustes.route) { AjustesContent() }
         }
     }
 }
@@ -101,7 +101,7 @@ fun BottomNavigationBar(navController: NavController) {
         Screen.Partidos,
         Screen.Home,
         Screen.Equipos,
-        Screen.Perfil,
+        Screen.Ajustes,
     )
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()

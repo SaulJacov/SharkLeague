@@ -8,8 +8,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun PerfilContent(modifier: Modifier = Modifier) {
+fun AjustesContent(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Pantalla de Perfil")
+        Text("Pantalla de Ajustes")
     }
 }
