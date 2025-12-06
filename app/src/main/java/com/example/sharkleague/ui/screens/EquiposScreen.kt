@@ -23,7 +23,7 @@ import com.example.sharkleague.ui.viewmodel.EquiposViewModelFactory
 fun EquiposContent(
     modifier: Modifier = Modifier,
     equiposViewModel: EquiposViewModel = viewModel(
-        factory = EquiposViewModelFactory((LocalContext.current.applicationContext as SharkLeagueApplication).repository)
+        factory = EquiposViewModelFactory((LocalContext.current.applicationContext as SharkLeagueApplication).equipoRepository)
     )
 ) {
     val equiposList by equiposViewModel.allEquipos.collectAsState()

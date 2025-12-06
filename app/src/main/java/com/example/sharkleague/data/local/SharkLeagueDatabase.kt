@@ -5,11 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.sharkleague.data.model.Equipo
+import com.example.sharkleague.data.model.Partido
 
-@Database(entities = [Equipo::class], version = 1, exportSchema = false)
+@Database(entities = [Equipo::class, Partido::class], version = 2, exportSchema = false)
 abstract class SharkLeagueDatabase : RoomDatabase() {
 
     abstract fun equipoDao(): EquipoDao
+    abstract fun partidoDao(): PartidoDao
 
     companion object {
         @Volatile
@@ -21,7 +23,9 @@ abstract class SharkLeagueDatabase : RoomDatabase() {
                     context.applicationContext,
                     SharkLeagueDatabase::class.java,
                     "shark_league_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
