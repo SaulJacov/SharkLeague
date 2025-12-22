@@ -20,17 +20,25 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sharkleague.SharkLeagueApplication
 import com.example.sharkleague.data.model.Partido
+import com.example.sharkleague.data.model.Equipo
 import com.example.sharkleague.ui.viewmodel.PartidosViewModel
 import com.example.sharkleague.ui.viewmodel.PartidosViewModelFactory
+import com.example.sharkleague.ui.viewmodel.EquiposViewModel
+import com.example.sharkleague.ui.viewmodel.EquiposViewModelFactory
 
 @Composable
 fun PartidosContent(
     modifier: Modifier = Modifier,
     partidosViewModel: PartidosViewModel = viewModel(
         factory = PartidosViewModelFactory((LocalContext.current.applicationContext as SharkLeagueApplication).partidoRepository)
+    ),
+    equiposViewModel: EquiposViewModel = viewModel(
+        factory = EquiposViewModelFactory((LocalContext.current.applicationContext as SharkLeagueApplication).equipoRepository)
     )
 ) {
     val partidosList by partidosViewModel.allPartidos.collectAsState()
+    val equiposList by equiposViewModel.allEquipos.collectAsState()
+    
     var showAddEditDialog by remember { mutableStateOf(false) }
     var showScoreDialog by remember { mutableStateOf(false) }
     var partidoToProcess by remember { mutableStateOf<Partido?>(null) }
@@ -84,6 +92,7 @@ fun PartidosContent(
     if (showAddEditDialog) {
         AddEditPartidoDialog(
             partido = partidoToProcess,
+            equiposDisponibles = equiposList,
             onDismiss = { showAddEditDialog = false },
             onConfirm = { local, visitor, date, time ->
                 if (partidoToProcess == null) {
@@ -134,13 +143,7 @@ fun PartidoItem(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Fecha: ${partido.date}",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = "Hora: ${partido.time}",
+                text = "Fecha: ${partido.date} | Hora: ${partido.time}",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -169,6 +172,7 @@ fun PartidoItem(
 @Composable
 fun AddEditPartidoDialog(
     partido: Partido?,
+    equiposDisponibles: List<Equipo>,
     onDismiss: () -> Unit,
     onConfirm: (String, String, String, String) -> Unit
 ) {
@@ -176,25 +180,85 @@ fun AddEditPartidoDialog(
     var visitorTeam by remember { mutableStateOf(partido?.visitorTeamName ?: "") }
     var date by remember { mutableStateOf(partido?.date ?: "") }
     var time by remember { mutableStateOf(partido?.time ?: "") }
+    
+    var expandedLocal by remember { mutableStateOf(false) }
+    var expandedVisitor by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (partido == null) "Añadir Partido" else "Editar Partido") },
         text = {
             Column {
-                OutlinedTextField(value = localTeam, onValueChange = { localTeam = it }, label = { Text("Equipo Local") })
+                // Selector para Equipo Local
+                ExposedDropdownMenuBox(
+                    expanded = expandedLocal,
+                    onExpandedChange = { expandedLocal = !expandedLocal }
+                ) {
+                    OutlinedTextField(
+                        value = localTeam,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Equipo Local") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLocal) },
+                        modifier = Modifier.menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedLocal,
+                        onDismissRequest = { expandedLocal = false }
+                    ) {
+                        equiposDisponibles.forEach { equipo ->
+                            DropdownMenuItem(
+                                text = { Text(equipo.name) },
+                                onClick = {
+                                    localTeam = equipo.name
+                                    expandedLocal = false
+                                }
+                            )
+                        }
+                    }
+                }
+                
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = visitorTeam, onValueChange = { visitorTeam = it }, label = { Text("Equipo Visitante") })
+                
+                // Selector para Equipo Visitante
+                ExposedDropdownMenuBox(
+                    expanded = expandedVisitor,
+                    onExpandedChange = { expandedVisitor = !expandedVisitor }
+                ) {
+                    OutlinedTextField(
+                        value = visitorTeam,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Equipo Visitante") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVisitor) },
+                        modifier = Modifier.menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedVisitor,
+                        onDismissRequest = { expandedVisitor = false }
+                    ) {
+                        equiposDisponibles.forEach { equipo ->
+                            DropdownMenuItem(
+                                text = { Text(equipo.name) },
+                                onClick = {
+                                    visitorTeam = equipo.name
+                                    expandedVisitor = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(value = date, onValueChange = { date = it }, label = { Text("Fecha (dd-mm-yyyy)") })
-                 Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(value = time, onValueChange = { time = it }, label = { Text("Hora (hh:mm am/pm)") })
             }
         },
         confirmButton = {
             Button(
                 onClick = { onConfirm(localTeam, visitorTeam, date, time) },
-                enabled = localTeam.isNotBlank() && visitorTeam.isNotBlank() && date.isNotBlank() && time.isNotBlank()
+                enabled = localTeam.isNotBlank() && visitorTeam.isNotBlank() && date.isNotBlank() && time.isNotBlank() && localTeam != visitorTeam
             ) { Text("Guardar") }
         },
         dismissButton = {
@@ -218,7 +282,7 @@ fun RegisterScoreDialog(
         title = { Text("Registrar Marcador") },
         text = {
             Column {
-                 Text("${partido?.localTeamName} vs ${partido?.visitorTeamName}")
+                 Text("${partido?.localTeamName} vs ${partido?.visitorTeamName}", style = MaterialTheme.typography.titleMedium)
                  Spacer(modifier = Modifier.height(16.dp))
                  Row(
                      verticalAlignment = Alignment.CenterVertically,
