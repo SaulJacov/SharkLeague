@@ -1,14 +1,14 @@
 package com.example.sharkleague.ui.screens
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.widget.DatePicker
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,12 +19,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sharkleague.SharkLeagueApplication
-import com.example.sharkleague.data.model.Partido
 import com.example.sharkleague.data.model.Equipo
-import com.example.sharkleague.ui.viewmodel.PartidosViewModel
-import com.example.sharkleague.ui.viewmodel.PartidosViewModelFactory
+import com.example.sharkleague.data.model.Partido
 import com.example.sharkleague.ui.viewmodel.EquiposViewModel
 import com.example.sharkleague.ui.viewmodel.EquiposViewModelFactory
+import com.example.sharkleague.ui.viewmodel.PartidosViewModel
+import com.example.sharkleague.ui.viewmodel.PartidosViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun PartidosContent(
@@ -38,7 +40,7 @@ fun PartidosContent(
 ) {
     val partidosList by partidosViewModel.allPartidos.collectAsState()
     val equiposList by equiposViewModel.allEquipos.collectAsState()
-    
+
     var showAddEditDialog by remember { mutableStateOf(false) }
     var showScoreDialog by remember { mutableStateOf(false) }
     var partidoToProcess by remember { mutableStateOf<Partido?>(null) }
@@ -126,15 +128,17 @@ fun PartidoItem(
     onRegisterScore: (Partido) -> Unit,
     onDelete: (Partido) -> Unit
 ) {
-    Card(modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()) {
+    Card(modifier = Modifier
+        .padding(vertical = 8.dp)
+        .fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-             Row(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(text = partido.localTeamName, style = MaterialTheme.typography.titleLarge)
-                if(partido.localScore != null && partido.visitorScore != null) {
+                if (partido.localScore != null && partido.visitorScore != null) {
                     Text(text = " ${partido.localScore} - ${partido.visitorScore} ", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 16.dp))
                 } else {
                     Text(text = " vs ", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
@@ -180,7 +184,52 @@ fun AddEditPartidoDialog(
     var visitorTeam by remember { mutableStateOf(partido?.visitorTeamName ?: "") }
     var date by remember { mutableStateOf(partido?.date ?: "") }
     var time by remember { mutableStateOf(partido?.time ?: "") }
-    
+
+    val context = LocalContext.current
+
+    val initialDateCalendar = Calendar.getInstance()
+    if (date.isNotBlank()) {
+        val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        try {
+            initialDateCalendar.time = sdf.parse(date) ?: Date()
+        } catch (_: Exception) {
+        }
+    }
+
+    val initialTimeCalendar = Calendar.getInstance()
+    if (time.isNotBlank()) {
+        val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        try {
+            initialTimeCalendar.time = sdf.parse(time) ?: Date()
+        } catch (_: Exception) {
+        }
+    }
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            val newDate = Calendar.getInstance()
+            newDate.set(year, month, dayOfMonth)
+            date = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(newDate.time)
+        },
+        initialDateCalendar.get(Calendar.YEAR),
+        initialDateCalendar.get(Calendar.MONTH),
+        initialDateCalendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _, hourOfDay, minute ->
+            val newTime = Calendar.getInstance()
+            newTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
+            newTime.set(Calendar.MINUTE, minute)
+            time = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(newTime.time)
+        },
+        initialTimeCalendar.get(Calendar.HOUR_OF_DAY),
+        initialTimeCalendar.get(Calendar.MINUTE),
+        false
+    )
+
     var expandedLocal by remember { mutableStateOf(false) }
     var expandedVisitor by remember { mutableStateOf(false) }
 
@@ -189,7 +238,6 @@ fun AddEditPartidoDialog(
         title = { Text(if (partido == null) "Añadir Partido" else "Editar Partido") },
         text = {
             Column {
-                // Selector para Equipo Local
                 ExposedDropdownMenuBox(
                     expanded = expandedLocal,
                     onExpandedChange = { expandedLocal = !expandedLocal }
@@ -217,10 +265,9 @@ fun AddEditPartidoDialog(
                         }
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                // Selector para Equipo Visitante
+
                 ExposedDropdownMenuBox(
                     expanded = expandedVisitor,
                     onExpandedChange = { expandedVisitor = !expandedVisitor }
@@ -250,9 +297,29 @@ fun AddEditPartidoDialog(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = date, onValueChange = { date = it }, label = { Text("Fecha (dd-mm-yyyy)") })
+                OutlinedTextField(
+                    value = date,
+                    onValueChange = {},
+                    label = { Text("Fecha") },
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { datePickerDialog.show() }) {
+                            Icon(Icons.Filled.DateRange, contentDescription = "Seleccionar Fecha")
+                        }
+                    }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = time, onValueChange = { time = it }, label = { Text("Hora (hh:mm am/pm)") })
+                OutlinedTextField(
+                    value = time,
+                    onValueChange = {},
+                    label = { Text("Hora") },
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { timePickerDialog.show() }) {
+                            Icon(Icons.Filled.AccessTime, contentDescription = "Seleccionar Hora")
+                        }
+                    }
+                )
             }
         },
         confirmButton = {
@@ -267,7 +334,6 @@ fun AddEditPartidoDialog(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScoreDialog(
     partido: Partido?,
@@ -282,12 +348,12 @@ fun RegisterScoreDialog(
         title = { Text("Registrar Marcador") },
         text = {
             Column {
-                 Text("${partido?.localTeamName} vs ${partido?.visitorTeamName}", style = MaterialTheme.typography.titleMedium)
-                 Spacer(modifier = Modifier.height(16.dp))
-                 Row(
-                     verticalAlignment = Alignment.CenterVertically,
-                     horizontalArrangement = Arrangement.SpaceAround
-                 ){
+                Text("${partido?.localTeamName} vs ${partido?.visitorTeamName}", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
                     OutlinedTextField(
                         value = localScore,
                         onValueChange = { localScore = it },
@@ -296,20 +362,20 @@ fun RegisterScoreDialog(
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                     OutlinedTextField(
+                    OutlinedTextField(
                         value = visitorScore,
                         onValueChange = { visitorScore = it },
                         label = { Text("Visitante") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
-                 }
+                }
             }
         },
         confirmButton = {
             Button(
                 onClick = { onConfirm(localScore.toIntOrNull() ?: 0, visitorScore.toIntOrNull() ?: 0) },
-                enabled = localScore.isNotBlank() && visitorScore.isNotBlank()
+                enabled = localScore.isNotBlank() && visitorScore.isNotBlank() && localScore.toIntOrNull() != null && visitorScore.toIntOrNull() != null
             ) { Text("Guardar") }
         },
         dismissButton = {
